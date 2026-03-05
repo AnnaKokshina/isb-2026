@@ -28,3 +28,33 @@ def test_identical_bits(text: str) -> float:
     num = abs(Vn - 2 * len(text) * ksi * (1 - ksi))
     denom = 2 * ((2 * len(text)) ** 0.5) * ksi * (1 - ksi)
     return math.erfc(num / denom)
+
+
+def test_longest_sequence(text: str) -> float:
+    """
+    NIST test for the longest sequence of ones in a block.
+    Return P value for this text
+    """
+    v = [0, 0, 0, 0]
+
+    for i in range(len(text) // BLOCK_SIZE):
+        block = text[i * BLOCK_SIZE:(i + 1) * BLOCK_SIZE]
+        if (block.count("1111") > 0):
+            v[3] += 1
+        elif (block.count("111") > 0):
+            v[2] += 1
+        elif (block.count("11") > 0):
+            v[1] += 1
+        else:
+            v[0] += 1
+
+    xi = 0
+    for i in range(4):
+        xi += ((v[i] - 16 * PI[i]) ** 2) / (16 * PI[i])
+
+    return gammaincc(1.5, xi / 2)
+
+
+def main() -> None:
+    """Main function."""
+   
