@@ -1,8 +1,9 @@
 import math
+import os
 
 from scipy.special import gammaincc
 
-from consts import BLOCK_SIZE, PI
+from consts import BLOCK_SIZE, PI, DIRECTORY, PVALUE, OUTPUT
 
 
 def test_frequency(text: str) -> float:
@@ -55,6 +56,36 @@ def test_longest_sequence(text: str) -> float:
     return gammaincc(1.5, xi / 2)
 
 
+def read(filename: str) -> str:
+    """Read file from filename. Return str readed text"""
+    try:
+        with open(filename) as f:
+            return f.read()
+    except Exception as e:
+        print(e)
+        exit(-1)
+
+
 def main() -> None:
     """Main function."""
-   
+    files = os.listdir(DIRECTORY)
+    results = []
+    for file in files:
+        if ".txt" in file and file.lower() != "cmakelists.txt":
+            text = read(DIRECTORY + file)
+            results.append([file, test_frequency(text), test_identical_bits(text), test_longest_sequence(text)])
+
+    for arr in results:
+        arr.append("True" if all(x >= PVALUE for x in arr[1:]) else "False")
+
+    with open(OUTPUT, "w") as f:
+        f.write("Language | Frequency test | test sequence of identical bits | test longest sequence | Results\n\n")
+        for arr in results:
+            for i in arr:
+                f.write(str(i))
+                f.write(" ")
+            f.write("\n")
+
+
+if __name__ == "__main__":
+    main()
