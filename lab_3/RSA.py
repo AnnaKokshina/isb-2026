@@ -23,22 +23,38 @@ def save_rsa_keys(public_key, public_pem, private_key, private_pem):
                 encryption_algorithm=serialization.NoEncryption()))
         
 
-def load_rsa_keys(public_pem, private_pem):
-    public_key, private_key = None, None
+def load_rsa_public(public_pem):
     with open(public_pem, 'rb') as pem_in:
         public_bytes = pem_in.read()
-        public_key = load_pem_public_key(public_bytes)
+        return load_pem_public_key(public_bytes)
+
+
+def load_rsa_private(private_pem):
     with open(private_pem, 'rb') as pem_in:
         private_bytes = pem_in.read()
-        private_key = load_pem_private_key(private_bytes,password=None,)
-    return public_key, private_key
+        return load_pem_private_key(private_bytes,password=None,)
 
 
 def rsa_encrypt(text, public_key):
-    c_text = public_key.encrypt(text, padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
+    c_text = public_key.encrypt(
+        text,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None,
+        ),
+    )
+
     return c_text
 
 
 def rsa_decrypt(c_text, private_key):
-    dc_text = private_key.decrypt(c_text,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
-    return dc_text.decode('UTF-8')
+    dc_text = private_key.decrypt(
+        c_text,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None,
+        ),
+    )
+    return dc_text
