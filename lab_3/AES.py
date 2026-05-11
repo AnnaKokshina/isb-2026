@@ -38,8 +38,15 @@ def save_symmetric_key(key: bytes, symmetric_path: str, public_key: bytes):
         symmetric_path: путь для сохранения симметричного ключа
         public_key: публичный ключ
     """
-    with open(symmetric_path, "wb") as key_file:
-        key_file.write(rsa_encrypt(key, public_key))
+    try:
+        with open(symmetric_path, "wb") as key_file:
+            key_file.write(rsa_encrypt(key, public_key))
+    except PermissionError:
+        print("Недостаточно прав для сохранения симметричного ключа")
+        exit(100)
+    except Exception as e:
+        print(e)
+        exit(100)
 
 
 def load_symmetric_key(symmetric_path: str, private_key: bytes):
@@ -50,9 +57,19 @@ def load_symmetric_key(symmetric_path: str, private_key: bytes):
         symmetric_path: путь к симметричному ключу
         private_key: приватный ключ
     """
-    with open(symmetric_path, mode="rb") as key_file:
-        symmetric_key = key_file.read()
-        return rsa_decrypt(symmetric_key, private_key)
+    try:
+        with open(symmetric_path, mode="rb") as key_file:
+            symmetric_key = key_file.read()
+            return rsa_decrypt(symmetric_key, private_key)
+    except PermissionError:
+        print("Недостаточно прав для чтения симметричного ключа")
+        exit(100)
+    except FileNotFoundError:
+        print("Не найден файл с симметричным ключом")
+        exit(100)
+    except Exception as e:
+        print(e)
+        exit(100)
 
 
 def aes_encrypt(path_to_data: str, private_pem: str, symmetric_path: str, path_to_save: str):

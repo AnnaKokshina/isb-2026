@@ -29,21 +29,35 @@ def save_rsa_keys(
         private_key: приватный ключ
         private_pem: путь для сохранения приватного ключа
     """
-    with open(public_pem, "wb") as public_out:
-        public_out.write(
-            public_key.public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    try:
+        with open(public_pem, "wb") as public_out:
+            public_out.write(
+                public_key.public_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PublicFormat.SubjectPublicKeyInfo,
+                )
             )
-        )
-    with open(private_pem, "wb") as private_out:
-        private_out.write(
-            private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption(),
+    except PermissionError:
+        print("Недостаточно прав для сохранения файла публичного ключа")
+        exit(100)
+    except Exception as e:
+        print(e)
+    
+    try:
+        with open(private_pem, "wb") as private_out:
+            private_out.write(
+                private_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.TraditionalOpenSSL,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
             )
-        )
+    except PermissionError:
+        print("Недостаточно прав для сохранения приватного ключа")
+        exit(100)
+    except Exception as e:
+        print(e)
+        exit(100)
 
 
 def load_rsa_public(public_pem: str):
@@ -53,9 +67,19 @@ def load_rsa_public(public_pem: str):
     Аргумент:
         public_pem: путь до публичного ключа
     """
-    with open(public_pem, "rb") as pem_in:
-        public_bytes = pem_in.read()
-        return load_pem_public_key(public_bytes)
+    try:
+        with open(public_pem, "rb") as pem_in:
+            public_bytes = pem_in.read()
+            return load_pem_public_key(public_bytes)
+    except PermissionError:
+        print("Недостаточно прав для чтения публичного ключа")
+        exit(100)
+    except FileNotFoundError:
+        print("Не найден файл с публичным ключом")
+        exit(100)
+    except Exception as e:
+        print(e)
+        exit(100)
 
 
 def load_rsa_private(private_pem: str):
@@ -65,13 +89,22 @@ def load_rsa_private(private_pem: str):
     Аргумент:
         private_pem: путь до приватного файла
     """
-    with open(private_pem, "rb") as pem_in:
-        private_bytes = pem_in.read()
-        return load_pem_private_key(
-            private_bytes,
-            password=None,
-        )
-
+    try:
+        with open(private_pem, "rb") as pem_in:
+            private_bytes = pem_in.read()
+            return load_pem_private_key(
+                private_bytes,
+                password=None,
+            )
+    except PermissionError:
+        print("Недостаточно прав для чтения приватного ключа")
+        exit(100)
+    except FileNotFoundError:
+        print("Не найден файл с приватным ключом")
+        exit(100)
+    except Exception as e:
+        print(e)
+        exit(100)
 
 def rsa_encrypt(text: str, public_key: bytes):
     """
